@@ -1,0 +1,164 @@
+name: CI and Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '**/*.MD'
+      - '**/*.txt'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+      - '**/*.gif'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment target environment"
+        type: choice
+        required: true
+        options:
+          - dev
+          - stg
+          - prod
+
+jobs:
+  build-and-test:
+    if: >-
+      github.event_name != 'push' ||
+      (github.event_name == 'push' &&
+       github.event.head_commit &&
+       !contains(github.event.head_commit.message, '[skip ci]') &&
+       !contains(github.event.head_commit.message, '[ci skip]'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run type check
+        run: npm run typecheck
+
+      - name: Run unit tests
+        run: npm test
+
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/develop')
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set deployment environment
+        id: set-env
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            DEPLOY_ENV="${{ github.event.inputs.environment }}"
+          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            DEPLOY_ENV="prod"
+          elif [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+            DEPLOY_ENV="dev"
+          else
+            DEPLOY_ENV="dev"
+          fi
+          echo "DEPLOY_ENV=$DEPLOY_ENV" >> $GITHUB_ENV
+          echo "🎯 Target environment: $DEPLOY_ENV"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Authenticate clasp
+        env:
+          CLASP_CREDENTIALS_JSON: ${{ secrets.CLASP_SERVICE_ACCOUNT }}
+        run: |
+          echo "🔐 Setting up clasp authentication..."
+          if [ -z "$CLASP_CREDENTIALS_JSON" ]; then
+            echo "❌ Error: Missing CLASP_SERVICE_ACCOUNT secret"
+            exit 1
+          fi
+          echo "$CLASP_CREDENTIALS_JSON" > credentials.json
+          npx clasp login --creds credentials.json
+          echo "✅ clasp authentication successful"
+
+      - name: Prepare clasp config
+        id: prepare-clasp
+        env:
+          GAS_SCRIPT_ID_DEV: ${{ secrets.GAS_SCRIPT_ID_DEV }}
+          GAS_SCRIPT_ID_STG: ${{ secrets.GAS_SCRIPT_ID_STG }}
+          GAS_SCRIPT_ID_PROD: ${{ secrets.GAS_SCRIPT_ID_PROD }}
+        run: |
+          echo "🔧 Preparing clasp configuration for $DEPLOY_ENV environment..."
+          case "$DEPLOY_ENV" in
+            dev)
+              SCRIPT_ID="$GAS_SCRIPT_ID_DEV"
+              TARGET_FILE=".clasp.dev.json"
+              ;;
+            stg)
+              SCRIPT_ID="$GAS_SCRIPT_ID_STG"
+              TARGET_FILE=".clasp.stg.json"
+              ;;
+            prod)
+              SCRIPT_ID="$GAS_SCRIPT_ID_PROD"
+              TARGET_FILE=".clasp.prod.json"
+              ;;
+            *)
+              echo "❌ Error: Unsupported environment: $DEPLOY_ENV"
+              exit 1
+              ;;
+          esac
+
+          if [ -z "$SCRIPT_ID" ]; then
+            echo "❌ Error: Script ID secret for $DEPLOY_ENV is not configured"
+            echo "Please set GAS_SCRIPT_ID_${DEPLOY_ENV^^} secret in repository settings"
+            exit 1
+          fi
+
+          echo "{\"scriptId\": \"$SCRIPT_ID\", \"rootDir\": \"dist\"}" > "$TARGET_FILE"
+          echo "✅ Created $TARGET_FILE with script ID ${SCRIPT_ID:0:10}..."
+
+      - name: Deploy to Google Apps Script
+        run: |
+          echo "🚀 Deploying to $DEPLOY_ENV environment..."
+          case "$DEPLOY_ENV" in
+            dev)
+              npm run deploy:dev
+              ;;
+            stg)
+              npm run deploy:stg
+              ;;
+            prod)
+              npm run deploy:prod
+              ;;
+          esac
+          echo "✅ Deployment to $DEPLOY_ENV completed successfully!"
+
+      - name: Clean up sensitive files
+        if: always()
+        run: |
+          rm -f credentials.json .clasp.json .clasp.dev.json .clasp.stg.json .clasp.prod.json

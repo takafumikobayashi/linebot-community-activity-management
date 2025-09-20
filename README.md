@@ -289,9 +289,35 @@ MAX_CONTEXT_HOURS=12         # 12時間以内の会話を対象
 
 ## デプロイ手順
 
-### 環境別デプロイ対応
+### CI/CD自動デプロイ (NEW)
 
-本プロジェクトは開発（dev）、ステージング（stg）、本番（prod）の3環境をサポートしています。
+GitHub Actionsによる自動デプロイをサポートしています：
+
+#### 🤖 自動デプロイ
+
+```bash
+# ブランチ連動デプロイ
+git push origin develop  # → dev環境に自動デプロイ
+git push origin main     # → prod環境に自動デプロイ
+```
+
+#### 🎯 手動デプロイ
+
+1. GitHub → Actions → "CI and Deploy" → "Run workflow"
+2. 環境選択：dev / stg / prod
+3. "Run workflow"をクリック
+
+#### 📋 必要なGitHub Secrets
+
+```bash
+# Repository Settings > Secrets and variables > Actions
+CLASP_SERVICE_ACCOUNT={"client_id":"...","refresh_token":"..."}
+GAS_SCRIPT_ID_DEV=your_dev_script_id
+GAS_SCRIPT_ID_STG=your_stg_script_id
+GAS_SCRIPT_ID_PROD=your_prod_script_id
+```
+
+### ローカルデプロイ（従来手順）
 
 #### 初回セットアップ
 
@@ -310,7 +336,7 @@ MAX_CONTEXT_HOURS=12         # 12時間以内の会話を対象
 # 開発環境へのデプロイ
 npm run deploy        # または npm run deploy:dev
 
-# ステージング環境へのデプロイ  
+# ステージング環境へのデプロイ
 npm run deploy:stg
 
 # 本番環境へのデプロイ

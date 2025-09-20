@@ -102,6 +102,8 @@ Create a spreadsheet with these sheets:
 
 ### 5. Deploy to Google Apps Script
 
+#### Option 1: Manual Deployment (Local Development)
+
 ```bash
 # Development environment (default)
 npm run deploy        # or npm run deploy:dev
@@ -114,6 +116,67 @@ npm run deploy:prod
 ```
 
 **How it works**: Each command builds the project and uses the corresponding `.clasp.*.json` file for deployment.
+
+#### Option 2: Automated Deployment (GitHub Actions)
+
+This project includes automated CI/CD deployment using GitHub Actions.
+
+##### GitHub Secrets Setup
+
+Configure the following secrets in your repository settings:
+
+```bash
+# Required secrets in repository settings
+CLASP_SERVICE_ACCOUNT=<service_account_json>
+GAS_SCRIPT_ID_DEV=<development_script_id>
+GAS_SCRIPT_ID_STG=<staging_script_id>
+GAS_SCRIPT_ID_PROD=<production_script_id>
+```
+
+**Service Account Setup**:
+1. Create a Google Cloud service account
+2. Enable Google Apps Script API
+3. Generate JSON credentials
+4. Add service account email to your GAS projects with editor permissions
+
+##### Deployment Triggers
+
+**Automatic Deployment**:
+- `develop` branch → Development environment
+- `main` branch → Production environment
+
+**Manual Deployment**:
+- Use "Run workflow" in GitHub Actions
+- Select target environment (dev/stg/prod)
+
+**Workflow Features**:
+- ✅ TypeScript type checking
+- ✅ ESLint code quality
+- ✅ Full test suite (220 tests)
+- ✅ Multi-environment support
+- ✅ Automatic environment detection
+- ✅ Secure credential management
+
+##### CI/CD Pipeline
+
+```yaml
+# Workflow runs on:
+# 1. Push to main/develop branches
+# 2. Manual workflow dispatch
+# 3. Skips CI for [skip ci] commits
+
+jobs:
+  build-and-test:
+    - Install dependencies
+    - Run ESLint
+    - Run TypeScript type check
+    - Run unit tests (220 tests)
+
+  deploy:
+    - Authenticate with Google Apps Script
+    - Configure environment-specific deployment
+    - Deploy to target environment
+```
 
 ### 6. Configure LINE Webhook
 
@@ -273,6 +336,36 @@ Monthly tasks:
    ```bash
    Solution: Ensure you have owner or editor access to the GAS project
    Check project settings in Google Apps Script console
+   ```
+
+### GitHub Actions Issues
+
+1. **Workflow fails with authentication error**
+
+   ```bash
+   Check: CLASP_SERVICE_ACCOUNT secret is properly configured
+   Solution: Verify service account JSON format and permissions
+   ```
+
+2. **Script ID not found during deployment**
+
+   ```bash
+   Check: GAS_SCRIPT_ID_* secrets are correctly set
+   Solution: Verify script IDs match actual GAS project IDs
+   ```
+
+3. **Build fails with test errors**
+
+   ```bash
+   Check: All 220 tests pass locally
+   Solution: Fix failing tests before pushing to repository
+   ```
+
+4. **Deployment succeeds but bot doesn't work**
+
+   ```bash
+   Check: Script Properties are configured in target GAS project
+   Solution: Manually verify environment variables in deployed environment
    ```
 
 3. **Script ID not found**

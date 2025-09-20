@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Google Apps Script](https://img.shields.io/badge/Google%20Apps%20Script-4285F4?logo=google&logoColor=white)](https://script.google.com/)
-[![Tests](https://img.shields.io/badge/Tests-243%20passed-green)](https://github.com/takafumikobayashi/linebot-community-activity-management)
+[![Tests](https://img.shields.io/badge/Tests-220%20passed-green)](https://github.com/takafumikobayashi/linebot-community-activity-management)
 
 > **🎉 Open Source Release**: This project has been open sourced and is now available for any community or organization to use and customize!
 

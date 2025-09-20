@@ -2,9 +2,7 @@
  * 定期実行タスクのハンドラ
  */
 
-import { getEventsFromKintone } from '../services/kintone';
 import {
-  saveEventsToSheet,
   getAllUserIds,
   getEventsForMonth,
   getEventsForDate,
@@ -100,29 +98,6 @@ function formatTimeForDisplay(timeObj: unknown): string {
     }
   } catch (_e) {
     return '';
-  }
-}
-
-/**
- * kintoneのイベントマスタとスプレッドシートを同期する
- */
-export function syncEventsFromKintone(): void {
-  console.log('[Sync] kintoneイベント同期処理 開始');
-
-  try {
-    // 1. kintoneからイベントデータを取得
-    const events = getEventsFromKintone();
-
-    // 2. スプレッドシートに保存
-    saveEventsToSheet(events);
-
-    console.log('[Sync] kintoneイベント同期処理 正常終了');
-  } catch (error) {
-    console.error(
-      '[Sync] kintoneイベント同期処理でエラーが発生しました:',
-      error,
-    );
-    // TODO: エラー発生を管理者に通知する処理（例: LINE Notify）
   }
 }
 

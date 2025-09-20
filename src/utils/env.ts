@@ -17,13 +17,6 @@ export function getConfig(): Config {
   const SIMILARITY_THRESHOLD =
     properties.getProperty('SIMILARITY_THRESHOLD') || '0.75';
 
-  // kintone
-  const KINTONE_DOMAIN = properties.getProperty('KINTONE_DOMAIN');
-  const KINTONE_EVENT_APP_ID = properties.getProperty('KINTONE_EVENT_APP_ID');
-  const KINTONE_EVENT_API_TOKEN = properties.getProperty(
-    'KINTONE_EVENT_API_TOKEN',
-  );
-
   // 必須項目の検証
   if (!CHANNEL_ACCESS_TOKEN) {
     throw createConfigError(
@@ -53,27 +46,6 @@ export function getConfig(): Config {
     );
   }
 
-  if (!KINTONE_DOMAIN) {
-    throw createConfigError(
-      'KINTONE_DOMAIN',
-      'kintoneのドメインが設定されていません',
-    );
-  }
-
-  if (!KINTONE_EVENT_APP_ID) {
-    throw createConfigError(
-      'KINTONE_EVENT_APP_ID',
-      'kintoneのイベントマスタアプリIDが設定されていません',
-    );
-  }
-
-  if (!KINTONE_EVENT_API_TOKEN) {
-    throw createConfigError(
-      'KINTONE_EVENT_API_TOKEN',
-      'kintoneのイベントマスタAPIトークンが設定されていません',
-    );
-  }
-
   // 数値の検証
   const threshold = parseFloat(SIMILARITY_THRESHOLD);
   if (isNaN(threshold) || threshold < 0 || threshold > 1) {
@@ -89,9 +61,6 @@ export function getConfig(): Config {
     SPREADSHEET_ID,
     STAFF_USER_ID,
     SIMILARITY_THRESHOLD: threshold,
-    KINTONE_DOMAIN,
-    KINTONE_EVENT_APP_ID,
-    KINTONE_EVENT_API_TOKEN,
   };
 }
 
@@ -191,5 +160,33 @@ export function getFallbackImages(): string[] {
   } catch (e) {
     console.warn('[Config] FALLBACK_IMAGES の解析に失敗しました:', e);
     return [];
+  }
+}
+
+/**
+ * 会話履歴コンテキストの設定を取得する
+ * @returns 会話履歴設定オブジェクト
+ */
+export function getConversationContextConfig(): {
+  maxConversationPairs: number;
+  maxContextHours: number;
+} {
+  try {
+    const maxPairs = PropertiesService.getScriptProperties().getProperty(
+      'MAX_CONVERSATION_PAIRS',
+    );
+    const maxHours =
+      PropertiesService.getScriptProperties().getProperty('MAX_CONTEXT_HOURS');
+
+    return {
+      maxConversationPairs: maxPairs ? parseInt(maxPairs, 10) : 7,
+      maxContextHours: maxHours ? parseInt(maxHours, 10) : 24,
+    };
+  } catch (e) {
+    console.warn('[Config] 会話コンテキスト設定の取得に失敗しました:', e);
+    return {
+      maxConversationPairs: 7,
+      maxContextHours: 24,
+    };
   }
 }

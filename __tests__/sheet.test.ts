@@ -3,7 +3,6 @@ import {
   writeLog,
   saveEmbedding,
   getFaqsWithoutEmbedding,
-  saveEventsToSheet,
   getAllUserIds,
   saveNewUser,
   getEventsForMonth,
@@ -14,7 +13,6 @@ import {
   getUpcomingEvents,
 } from '../src/services/sheet';
 import { getConfig } from '../src/utils/env';
-import { KintoneEventRecord } from '../src/types/index';
 
 // getConfigをモック化
 jest.mock('../src/utils/env', () => ({
@@ -288,233 +286,6 @@ describe('sheet.ts', () => {
       expect(result).toHaveLength(0);
       expect(mockConsole.log).toHaveBeenCalledWith(
         '[Sheet] Embedding未設定FAQ: 0件',
-      );
-    });
-  });
-
-  describe('saveEventsToSheet', () => {
-    beforeEach(() => {
-      // Eventシート用のモック設定
-      mockSheet.getValues.mockReturnValue([
-        [
-          'kintoneRecordId',
-          'ステータス',
-          'イベント名',
-          '開催日',
-          '開始時間',
-          '終了時間',
-        ], // ヘッダー
-      ]);
-    });
-
-    it('新しいイベントを正しく追加できるべき', () => {
-      const mockEvents: KintoneEventRecord[] = [
-        {
-          $id: { type: 'RECORD_NUMBER', value: '123' },
-          イベント名: { type: 'SINGLE_LINE_TEXT', value: 'テストイベント1' },
-          開始日時: { type: 'DATETIME', value: '2025-09-01T10:00:00Z' },
-          終了日時: { type: 'DATETIME', value: '2025-09-01T12:00:00Z' },
-        },
-      ];
-
-      // 既存データなし（ヘッダーのみ）
-      mockSheet.getLastRow.mockReturnValue(1);
-      mockSheet.getValues.mockReturnValue([
-        [
-          'kintoneRecordId',
-          'ステータス',
-          'イベント名',
-          '開催日',
-          '開始時間',
-          '終了時間',
-        ],
-      ]);
-
-      saveEventsToSheet(mockEvents);
-
-      expect(mockSpreadsheetApp.openById).toHaveBeenCalledWith(
-        'test_spreadsheet_id',
-      );
-      expect(mockSpreadsheet.getSheetByName).toHaveBeenCalledWith('Event');
-      expect(mockSheet.appendRow).toHaveBeenCalledWith([
-        '123', // kintoneRecordId
-        '未開催', // ステータス
-        'テストイベント1', // イベント名
-        '2025/09/01', // 開催日（修正：YYYY/MM/DD形式）
-        '19:00', // 開始時間（JST）
-        '21:00', // 終了時間（JST）
-      ]);
-      expect(mockConsole.log).toHaveBeenCalledWith(
-        '[Sheet] Eventシートへの保存完了。追加: 1件, 更新: 0件, キャンセル: 0件',
-      );
-    });
-
-    it('既存のイベントを正しく更新できるべき', () => {
-      const mockEvents: KintoneEventRecord[] = [
-        {
-          $id: { type: 'RECORD_NUMBER', value: '123' },
-          イベント名: { type: 'SINGLE_LINE_TEXT', value: '更新されたイベント' },
-          開始日時: { type: 'DATETIME', value: '2025-09-01T10:00:00Z' },
-          終了日時: { type: 'DATETIME', value: '2025-09-01T12:00:00Z' },
-        },
-      ];
-
-      // 既存データあり
-      mockSheet.getLastRow.mockReturnValue(2);
-      mockSheet.getValues.mockReturnValue([
-        [
-          'kintoneRecordId',
-          'ステータス',
-          'イベント名',
-          '開催日',
-          '開始時間',
-          '終了時間',
-        ], // ヘッダー
-        ['123', '未開催', '古いイベント名', '2025/8/1', '10:00', '12:00'], // 既存データ
-      ]);
-
-      saveEventsToSheet(mockEvents);
-
-      expect(mockSheet.getRange).toHaveBeenCalled(); // 更新処理が呼ばれる
-      expect(mockConsole.log).toHaveBeenCalledWith(
-        '[Sheet] Eventシートへの保存完了。追加: 0件, 更新: 1件, キャンセル: 1件',
-      );
-    });
-
-    it('Eventシートが見つからない場合にエラーをスローすべき', () => {
-      mockSpreadsheet.getSheetByName.mockReturnValue(null);
-
-      expect(() => saveEventsToSheet([])).toThrow(
-        'Eventシートが見つかりません',
-      );
-      expect(mockConsole.error).toHaveBeenCalledWith(
-        '[Sheet] Eventシートへの保存エラー:',
-        expect.any(Error),
-      );
-    });
-
-    it('空のイベント配列でも正常に処理できるべき', () => {
-      mockSheet.getLastRow.mockReturnValue(1);
-
-      saveEventsToSheet([]);
-
-      expect(mockConsole.log).toHaveBeenCalledWith(
-        '[Sheet] Eventシートへの保存完了。追加: 0件, 更新: 0件, キャンセル: 0件',
-      );
-    });
-
-    it('対象月のみ「未開催」ステータスのイベントをキャンセルに更新すべき', () => {
-      // 既存データのモック（異なる月と異なるステータスを含む）
-      mockSheet.getLastRow.mockReturnValue(5); // ヘッダー + 4行
-      mockSheet.getLastColumn.mockReturnValue(6);
-      const mockSetValue = jest.fn();
-      mockSheet.getRange.mockImplementation(
-        (row: number, col: number, numRows?: number, _numCols?: number) => {
-          if (row === 1 && numRows === 1) {
-            // ヘッダー行
-            return {
-              getValues: jest
-                .fn()
-                .mockReturnValue([
-                  [
-                    'kintoneRecordId',
-                    'ステータス',
-                    'イベント名',
-                    '開催日',
-                    '開始時間',
-                    '終了時間',
-                  ],
-                ]),
-            };
-          } else if (row === 2 && numRows === 4) {
-            // データ行
-            return {
-              getValues: jest.fn().mockReturnValue([
-                [
-                  '456',
-                  '未開催',
-                  '対象月未開催イベント',
-                  '2025/09/15',
-                  '10:00',
-                  '12:00',
-                ], // キャンセル対象
-                [
-                  '789',
-                  '終了',
-                  '対象月終了イベント',
-                  '2025/09/20',
-                  '14:00',
-                  '16:00',
-                ], // 終了済み→対象外
-                [
-                  '999',
-                  '未開催',
-                  '対象外月未開催イベント',
-                  '2025/10/15',
-                  '10:00',
-                  '12:00',
-                ], // 対象外月→対象外
-                [
-                  '111',
-                  'キャンセル',
-                  '既にキャンセル済み',
-                  '2025/09/25',
-                  '15:00',
-                  '17:00',
-                ], // 既にキャンセル→対象外
-              ]),
-            };
-          }
-          return { getValues: jest.fn(), setValue: mockSetValue };
-        },
-      );
-
-      // 9月のイベントのみを取得したと仮定
-      const mockEvents: KintoneEventRecord[] = [
-        {
-          $id: { type: 'RECORD_NUMBER', value: '123' },
-          イベント名: { type: 'SINGLE_LINE_TEXT', value: '新規9月イベント' },
-          開始日時: { type: 'DATETIME', value: '2025-09-10T10:00:00Z' },
-          終了日時: { type: 'DATETIME', value: '2025-09-10T12:00:00Z' },
-        },
-      ];
-
-      saveEventsToSheet(mockEvents);
-
-      // 対象月（9月）かつ未開催の「456」のみキャンセルに更新されることを確認
-      expect(mockSheet.getRange).toHaveBeenCalledWith(2, 2); // 456の行、ステータス列
-      expect(mockSetValue).toHaveBeenCalledWith('キャンセル');
-      expect(mockConsole.log).toHaveBeenCalledWith(
-        '[Sheet] Eventシートへの保存完了。追加: 1件, 更新: 0件, キャンセル: 1件',
-      );
-    });
-
-    it('取得イベントが空の場合はキャンセル処理をスキップすべき', () => {
-      mockSheet.getLastRow.mockReturnValue(2);
-      mockSheet.getLastColumn.mockReturnValue(6);
-      mockSheet.getRange.mockImplementation(() => ({
-        getValues: jest
-          .fn()
-          .mockReturnValue([
-            [
-              'kintoneRecordId',
-              'ステータス',
-              'イベント名',
-              '開催日',
-              '開始時間',
-              '終了時間',
-            ],
-          ]),
-        setValue: jest.fn(),
-      }));
-
-      saveEventsToSheet([]); // 空配列
-
-      expect(mockConsole.warn).toHaveBeenCalledWith(
-        '[Sheet] 取得イベントが空のため、キャンセル更新はスキップしました',
-      );
-      expect(mockConsole.log).toHaveBeenCalledWith(
-        '[Sheet] Eventシートへの保存完了。追加: 0件, 更新: 0件, キャンセル: 0件',
       );
     });
   });
@@ -837,18 +608,32 @@ describe('sheet.ts', () => {
       mockSheet.getLastColumn.mockReturnValue(5);
 
       // モックデータ: [timestamp, userId, message, response, similarity]
+      // 2025年の現在に近いタイムスタンプを使用（24時間以内）
+      const baseTime = 1726917600000 + 365 * 24 * 60 * 60 * 1000; // 2025年相当
       const mockLogData = [
-        ['2025-01-01T10:00:00Z', 'user123', 'こんにちは', 'こんにちは！', ''],
-        ['2025-01-01T10:01:00Z', 'user456', '元気？', '元気です！', ''],
         [
-          '2025-01-01T10:02:00Z',
+          new Date(baseTime - 4 * 60 * 60 * 1000),
+          'user123',
+          'こんにちは',
+          'こんにちは！',
+          '',
+        ],
+        [
+          new Date(baseTime - 3 * 60 * 60 * 1000),
+          'user456',
+          '元気？',
+          '元気です！',
+          '',
+        ],
+        [
+          new Date(baseTime - 2 * 60 * 60 * 1000),
           'user123',
           '今日暑いね',
           'そうですね、暑いですね',
           '',
         ],
         [
-          '2025-01-01T10:03:00Z',
+          new Date(baseTime - 1 * 60 * 60 * 1000),
           'user123',
           'ありがとう',
           'どういたしまして',
@@ -860,7 +645,7 @@ describe('sheet.ts', () => {
         getValues: jest.fn().mockReturnValue(mockLogData),
       });
 
-      const result = getRecentConversationForUser('user123', 2);
+      const result = getRecentConversationForUser('user123', 2, 9999);
 
       // limitPairs=2で最新2往復（4件）を取得、最初の会話は除外される
       expect(result).toEqual([
@@ -888,19 +673,51 @@ describe('sheet.ts', () => {
       mockSheet.getLastRow.mockReturnValue(10);
       mockSheet.getLastColumn.mockReturnValue(5);
 
+      // 2025年の現在に近いタイムスタンプを使用（24時間以内）
+      const baseTime = 1726917600000 + 365 * 24 * 60 * 60 * 1000; // 2025年相当
       const mockLogData = [
-        ['2025-01-01T09:00:00Z', 'user123', 'メッセージ1', '応答1', ''],
-        ['2025-01-01T09:01:00Z', 'user123', 'メッセージ2', '応答2', ''],
-        ['2025-01-01T09:02:00Z', 'user123', 'メッセージ3', '応答3', ''],
-        ['2025-01-01T09:03:00Z', 'user123', 'メッセージ4', '応答4', ''],
-        ['2025-01-01T09:04:00Z', 'user123', 'メッセージ5', '応答5', ''],
+        [
+          new Date(baseTime - 5 * 60 * 60 * 1000),
+          'user123',
+          'メッセージ1',
+          '応答1',
+          '',
+        ],
+        [
+          new Date(baseTime - 4 * 60 * 60 * 1000),
+          'user123',
+          'メッセージ2',
+          '応答2',
+          '',
+        ],
+        [
+          new Date(baseTime - 3 * 60 * 60 * 1000),
+          'user123',
+          'メッセージ3',
+          '応答3',
+          '',
+        ],
+        [
+          new Date(baseTime - 2 * 60 * 60 * 1000),
+          'user123',
+          'メッセージ4',
+          '応答4',
+          '',
+        ],
+        [
+          new Date(baseTime - 1 * 60 * 60 * 1000),
+          'user123',
+          'メッセージ5',
+          '応答5',
+          '',
+        ],
       ];
 
       mockSheet.getRange.mockReturnValue({
         getValues: jest.fn().mockReturnValue(mockLogData),
       });
 
-      const result = getRecentConversationForUser('user123', 2);
+      const result = getRecentConversationForUser('user123', 2, 9999);
 
       // 最新2往復（4件）のみ取得
       expect(result).toHaveLength(4);
@@ -962,17 +779,31 @@ describe('sheet.ts', () => {
       mockSheet.getLastRow.mockReturnValue(5);
       mockSheet.getLastColumn.mockReturnValue(5);
 
+      // 2025年の現在に近いタイムスタンプを使用（24時間以内）
+      const baseTime = 1726917600000 + 365 * 24 * 60 * 60 * 1000; // 2025年相当
       const mockLogData = [
-        ['2025-01-01T10:00:00Z', 'user123', '', '応答1', ''], // 空メッセージ
-        ['2025-01-01T10:01:00Z', 'user123', 'メッセージ2', '', ''], // 空応答
-        ['2025-01-01T10:02:00Z', 'user123', 'メッセージ3', '応答3', ''],
+        [new Date(baseTime - 3 * 60 * 60 * 1000), 'user123', '', '応答1', ''], // 空メッセージ
+        [
+          new Date(baseTime - 2 * 60 * 60 * 1000),
+          'user123',
+          'メッセージ2',
+          '',
+          '',
+        ], // 空応答
+        [
+          new Date(baseTime - 1 * 60 * 60 * 1000),
+          'user123',
+          'メッセージ3',
+          '応答3',
+          '',
+        ],
       ];
 
       mockSheet.getRange.mockReturnValue({
         getValues: jest.fn().mockReturnValue(mockLogData),
       });
 
-      const result = getRecentConversationForUser('user123', 3);
+      const result = getRecentConversationForUser('user123', 3, 9999);
 
       expect(result).toEqual([
         { role: 'assistant', content: '応答1' },

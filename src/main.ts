@@ -8,7 +8,6 @@ import { routeEvent } from './router';
 import { validateConfig } from './utils/env';
 import { generateEmbeddingsForSheet } from './handlers/faq'; // generateEmbeddingsForSheetをインポート
 import {
-  syncEventsFromKintone,
   sendMonthlySchedule,
   sendEventReminders,
   sendThankYouMessages,
@@ -21,7 +20,6 @@ Object.assign(globalThis, {
   doGet,
   checkConfiguration,
   generateEmbeddingsForSheet, // FAQのEmbedding生成関数も公開
-  syncEventsFromKintone, // kintoneイベント同期関数も公開
   sendMonthlySchedule,
   sendEventReminders,
   sendThankYouMessages,

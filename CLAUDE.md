@@ -5,7 +5,7 @@
 **LINE × AI コミュニティ活動管理システム**：
 
 - LINE Messaging API + OpenAI API + Google Apps Script
-- TypeScript + Jest（11スイート、243テスト）
+- TypeScript + Jest（10スイート、220テスト）
 - 全8機能実装完了（v1.4.0）
 
 ### システム構成
@@ -25,7 +25,7 @@
 # 開発前の確認
 npm run typecheck  # TypeScript型チェック
 npm run lint       # ESLint + Prettier
-npm test           # 全テスト実行（243テスト）
+npm test           # 全テスト実行（220テスト）
 
 # コミット前の必須確認
 npm run lint && npm test && npm run typecheck
@@ -107,7 +107,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ### 品質基準
 
 - **テストカバレッジ**: 90%以上目標
-- **全テスト成功**: 243テスト全てpass必須
+- **全テスト成功**: 220テスト全てpass必須
 - **型安全性**: TypeScript strictモード、エラー0件
 - **コード品質**: ESLint clean、Prettier適用済み
 
@@ -170,8 +170,10 @@ src/
 
 ### 4. 雑談対応
 
-- **文脈維持**: 直近3往復の会話履歴参照
+- **文脈維持**: 直近7往復の会話履歴参照（24時間以内、設定可能）
 - **統一システムメッセージ**: FAQ応答と雑談で共通の品質
+- **時間ベースフィルタリング**: 指定時間以内の会話のみ取得
+- **設定可能なコンテキスト**: MAX_CONVERSATION_PAIRS、MAX_CONTEXT_HOURS
 
 ## 重要な実装ポイント
 
@@ -231,12 +233,13 @@ pushConfirmParticipationWithImage(userId, text, eventId, imageUrl?)
 
 ## テスト戦略
 
-### テスト構成（11ファイル/243テスト）
+### テスト構成（10ファイル/220テスト）
 
 - **FAQ**: faq.test.ts（雑談フォールバック対応）
 - **定期実行**: scheduled.test.ts（画像付きリマインダー機能）
 - **LINE API**: line.test.ts（画像付きメッセージ機能）
 - **ルーティング**: router.test.ts（日付指定RSVP機能）
+- **スプレッドシート**: sheet.test.ts（会話コンテキスト拡張機能対応）
 - **E2E**: e2e.test.ts、e2e.schedule.test.ts
 
 ### モック設定
@@ -259,6 +262,10 @@ KINTONE_EVENT_APP_ID=your_event_app_id
 KINTONE_EVENT_API_TOKEN=your_event_api_token
 FAQ_SINGLE_WORD_TRIGGERS=["持ち物","集合場所","アクセス","時間","日程"]
 FALLBACK_IMAGES=["https://example.com/image1.jpg","https://example.com/image2.jpg"]
+
+# 会話コンテキスト設定（NEW）
+MAX_CONVERSATION_PAIRS=7     # 雑談で参照する最大往復数（デフォルト: 7）
+MAX_CONTEXT_HOURS=24         # 会話履歴の有効時間（時間、デフォルト: 24）
 ```
 
 ## デプロイ
@@ -274,7 +281,7 @@ npm run deploy:prod   # 本番環境
 
 ### デプロイ前チェックリスト
 
-- [ ] 全テスト成功（243テスト）
+- [ ] 全テスト成功（220テスト）
 - [ ] リント・型チェック clean
 - [ ] 環境変数設定確認
 - [ ] スプレッドシート権限確認
@@ -314,5 +321,5 @@ npm run deploy:prod   # 本番環境
 ---
 
 **最終更新**: 2025年9月20日
-**バージョン**: v1.4.0
-**ステータス**: 全8機能実装完了
+**バージョン**: v1.5.0
+**ステータス**: 全8機能実装完了（会話コンテキスト拡張機能追加）

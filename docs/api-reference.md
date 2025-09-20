@@ -22,6 +22,22 @@ function getOrganizationConfig(): OrganizationConfig
 - `ACTIVITY_TYPE`: Default "活動"
 - `FAQ_TRIGGER_PHRASE`: Default "教えて"
 
+### Conversation Context Configuration
+
+```typescript
+interface ConversationContextConfig {
+  maxConversationPairs: number;  // Default: 7
+  maxContextHours: number;       // Default: 24
+}
+
+function getConversationContextConfig(): ConversationContextConfig
+```
+
+**Environment Variables:**
+
+- `MAX_CONVERSATION_PAIRS`: Maximum conversation exchanges to reference (default: 7)
+- `MAX_CONTEXT_HOURS`: Time window for conversation history in hours (default: 24)
+
 ### Message Templates
 
 ```typescript
@@ -248,10 +264,18 @@ function writeLog(
   botResponse: string
 ): void
 
+// Enhanced conversation retrieval with time filtering
 function getRecentConversationForUser(
   userId: string,
-  maxRows: number
-): ConversationEntry[]
+  limitPairs: number = 7,
+  maxHours: number = 24
+): Array<{ role: 'user' | 'assistant'; content: string }>
+
+// Conversation context configuration
+function getConversationContextConfig(): {
+  maxConversationPairs: number;
+  maxContextHours: number;
+}
 ```
 
 ### Data Structures
@@ -303,10 +327,10 @@ function generateSimpleChat(
   temperature: number = 0.3
 ): string
 
-// Chat with history
+// Chat with history (enhanced with time filtering)
 function generateChatWithHistory(
   systemPrompt: string,
-  history: ConversationEntry[],
+  history: Array<{ role: 'user' | 'assistant'; content: string }>,
   currentMessage: string,
   maxTokens: number = 200,
   temperature: number = 0.3

@@ -23,7 +23,7 @@ import {
   createFaqPrompt,
   generateChatWithHistory,
 } from '../services/openai';
-import { KURUHOUSE_SYSTEM_MESSAGE } from '../utils/prompts';
+import { SHARED_SYSTEM_MESSAGE } from '../utils/prompts';
 import { replyMessage } from '../services/line';
 
 /**
@@ -87,7 +87,7 @@ export function handleFaq(
       }
 
       responseMessage = generateChatWithHistory(
-        KURUHOUSE_SYSTEM_MESSAGE,
+        SHARED_SYSTEM_MESSAGE,
         history,
         cleanedQuestion,
         200,

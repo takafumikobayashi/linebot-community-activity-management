@@ -139,7 +139,7 @@ describe('faq.ts', () => {
         24,
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         [],
         userQuestion,
         200,
@@ -173,7 +173,7 @@ describe('faq.ts', () => {
         24,
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         [],
         userQuestion,
         200,
@@ -198,7 +198,7 @@ describe('faq.ts', () => {
         24,
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         [],
         userQuestion,
         200,
@@ -228,7 +228,7 @@ describe('faq.ts', () => {
         24,
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         mockHistory,
         userQuestion,
         200,

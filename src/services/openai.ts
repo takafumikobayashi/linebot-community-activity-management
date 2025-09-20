@@ -197,7 +197,7 @@ export function createFaqPrompt(
   faqAnswer: string,
 ): string {
   const config = getOrganizationConfig();
-  return `あなたは親切な${config.activityType}団体のスタッフです。以下の情報を参考にして、ユーザーからの質問に丁寧に回答してください。
+  return `あなたは${config.activityType}団体「${config.name}」の相談窓口AIです。以下の参照情報を基に、敬意と共感を示しつつ地域活動に関わる利用者が安心して次の行動を取れるよう、平易で簡潔に案内してください。
 
 --- 参考情報 ---
 質問: ${faqQuestion}
@@ -206,7 +206,7 @@ export function createFaqPrompt(
 --- ユーザーからの質問 ---
 ${userQuestion}
 
-回答は簡潔で分かりやすく、親しみやすい口調でお願いします。`;
+回答では確認可能な根拠や手順を明示し、判断が難しい場合は無理に断定せず適切な窓口や担当者を案内してください。`;
 }
 
 /**
@@ -235,7 +235,7 @@ export function createChatPromptWithHistory(
   const config = getOrganizationConfig();
   const lines: string[] = [];
   lines.push(
-    `あなたは親切な${config.activityType}団体のスタッフです。会話の文脈を踏まえて、共感的で温かい返答をしてください。`,
+    `あなたは${config.activityType}団体「${config.name}」の相談窓口AIです。会話の文脈を踏まえ、敬意と共感をもって地域を支える活動に関わる利用者が次の行動を取りやすいよう案内してください。`,
   );
   if (history && history.length > 0) {
     lines.push('\n--- これまでの会話（古い→新しい）---');
@@ -246,6 +246,8 @@ export function createChatPromptWithHistory(
   }
   lines.push('\n--- 今回のユーザーからのメッセージ ---');
   lines.push(userMessage);
-  lines.push('\n回答は簡潔で温かみがあり、相手を励ます一言を添えてください。');
+  lines.push(
+    '\n回答は平易で簡潔にまとめ、必要に応じて確認方法や担当窓口を示しつつ利用者の安心を支える励ましを添えてください。',
+  );
   return lines.join('\n');
 }

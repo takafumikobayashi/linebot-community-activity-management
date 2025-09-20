@@ -225,7 +225,7 @@ MAX_CONTEXT_HOURS=24         # 会話履歴の有効時間（時間、デフォ�
 
 2. **統一システムメッセージによる文脈継承強化** (NEW)
    - `generateChatWithHistory()`: OpenAI Chat APIへの直接統合による履歴付き会話生成
-   - `KURUHOUSE_SYSTEM_MESSAGE`: 共有システムメッセージ定数（`src/utils/prompts.ts`）
+   - `SHARED_SYSTEM_MESSAGE`: 共有システムメッセージ定数（`src/utils/prompts.ts`）
    - FAQ応答と雑談応答で統一されたAI応答品質を実現
    - temperature: 0.3（文脈重視で安定化）、frequency_penalty: 0.2（反復抑止）
    - FAQ不一致時も同一システムメッセージで雑談にフォールバック（履歴参照あり）
@@ -430,7 +430,7 @@ FAQフォールバック: FAQ検索の類似度が閾値未満の場合は、固
 
 **統一システムメッセージによる文脈継承機能の詳細** (NEW):
 
-- `KURUHOUSE_SYSTEM_MESSAGE`: FAQ応答と雑談応答で共通のシステムメッセージ定数
+- `SHARED_SYSTEM_MESSAGE`: FAQ応答と雑談応答で共通のシステムメッセージ定数
 - `generateChatWithHistory()`: OpenAI Chat APIへの直接統合による履歴付き会話生成
 - ユーザーごとに会話履歴を`Log`シートから自動取得（最大7往復、24時間以内）
 - FAQ不一致時も同一システムメッセージで雑談フォールバック

@@ -227,11 +227,12 @@ describe('openai.ts', () => {
 
       const result = createFaqPrompt(userQuestion, faqQuestion, faqAnswer);
 
-      expect(result).toContain('活動団体のスタッフです');
+      expect(result).toContain('相談窓口AIです');
+      expect(result).toContain('敬意と共感を示し');
       expect(result).toContain('活動時間について');
       expect(result).toContain('毎週土曜日10:00-12:00です');
       expect(result).toContain('ボランティアの時間は？');
-      expect(result).toContain('親しみやすい口調');
+      expect(result).toContain('確認可能な根拠や手順');
     });
 
     it('特殊文字を含む入力でも正しく処理すべき', () => {
@@ -253,10 +254,10 @@ describe('openai.ts', () => {
 
       const result = createChatPrompt(userMessage);
 
-      expect(result).toContain('活動団体のスタッフです');
+      expect(result).toContain('相談窓口AIです');
       expect(result).toContain('今日は良い天気ですね');
-      expect(result).toContain('共感的で温かい返答');
-      expect(result).toContain('活動に参加していることを応援');
+      expect(result).toContain('共感と敬意をもって応対し');
+      expect(result).toContain('専門窓口や人の担当者へつないでください');
     });
 
     it('長いメッセージでも正しく処理すべき', () => {
@@ -265,7 +266,7 @@ describe('openai.ts', () => {
       const result = createChatPrompt(longMessage);
 
       expect(result).toContain(longMessage);
-      expect(result).toContain('活動団体のスタッフです');
+      expect(result).toContain('相談窓口AIです');
     });
   });
 
@@ -287,8 +288,8 @@ describe('openai.ts', () => {
 
       const result = createChatPromptWithHistory(history, userMessage);
 
-      expect(result).toContain('活動団体のスタッフです');
-      expect(result).toContain('会話の文脈を踏まえて');
+      expect(result).toContain('相談窓口AIです');
+      expect(result).toContain('敬意と共感をもって');
       expect(result).toContain('これまでの会話（古い→新しい）');
       expect(result).toContain('ユーザー: 元気ですか？');
       expect(result).toContain('あなた: 元気です！ありがとうございます。');
@@ -296,7 +297,7 @@ describe('openai.ts', () => {
       expect(result).toContain('あなた: そうですね、過ごしやすい日です。');
       expect(result).toContain('今回のユーザーからのメッセージ');
       expect(result).toContain('ボランティア活動も楽しそうです');
-      expect(result).toContain('相手を励ます一言');
+      expect(result).toContain('確認方法や担当窓口を示しつつ');
     });
 
     it('空の履歴でも正しく処理すべき', () => {
@@ -306,8 +307,8 @@ describe('openai.ts', () => {
 
       const result = createChatPromptWithHistory(history, userMessage);
 
-      expect(result).toContain('活動団体のスタッフです');
-      expect(result).toContain('会話の文脈を踏まえて');
+      expect(result).toContain('相談窓口AIです');
+      expect(result).toContain('敬意と共感をもって');
       expect(result).toContain('今回のユーザーからのメッセージ');
       expect(result).toContain('こんにちは');
       expect(result).not.toContain('これまでの会話');

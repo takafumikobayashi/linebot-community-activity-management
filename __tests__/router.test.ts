@@ -766,7 +766,7 @@ describe('router.ts', () => {
       const event = createLineMessageEvent('元気ですか？');
       routeEvent(event);
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         [],
         '元気ですか？',
         200,
@@ -783,7 +783,7 @@ describe('router.ts', () => {
       const event = createLineMessageEvent('気分はどうですか？');
       routeEvent(event);
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         [],
         '気分はどうですか？',
         200,
@@ -796,7 +796,7 @@ describe('router.ts', () => {
       const event = createLineMessageEvent('やる気が出ないです');
       routeEvent(event);
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         [],
         'やる気が出ないです',
         200,
@@ -809,7 +809,7 @@ describe('router.ts', () => {
       const event = createLineMessageEvent('元気が出る方法ありますか？');
       routeEvent(event);
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         [],
         '元気が出る方法ありますか？',
         200,
@@ -823,7 +823,7 @@ describe('router.ts', () => {
       const event = createLineMessageEvent('今日の天気は良いですね');
       routeEvent(event);
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         [],
         '今日の天気は良いですね',
         200,
@@ -949,7 +949,7 @@ describe('router.ts', () => {
         24,
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         [],
         '今日は良い天気ですね',
         200,
@@ -983,7 +983,7 @@ describe('router.ts', () => {
         24,
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         mockHistory,
         '今日も頑張りましょう',
         200,
@@ -1015,7 +1015,7 @@ describe('router.ts', () => {
         expect.objectContaining({ message: '履歴取得エラー' }),
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         [],
         '今日はいい天気ですね',
         200,
@@ -1036,7 +1036,7 @@ describe('router.ts', () => {
       routeEvent(event);
 
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         [],
         'テストメッセージ',
         200,
@@ -1051,7 +1051,7 @@ describe('router.ts', () => {
       routeEvent(event);
 
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         [],
         'テスト',
         200,
@@ -1108,7 +1108,7 @@ describe('router.ts', () => {
       routeEvent(event);
 
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
-        expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
+        expect.any(String), // SHARED_SYSTEM_MESSAGE
         longHistory,
         '続きの会話',
         200,

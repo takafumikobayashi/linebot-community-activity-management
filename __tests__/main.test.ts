@@ -49,7 +49,7 @@ const getLastPayload = () => {
   return lastCall ? JSON.parse(lastCall[0]) : undefined;
 };
 
-describe('main entrypoints', () => {
+describe('mainエントリポイントのテスト', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     routeEventMock.mockReset();
@@ -57,7 +57,7 @@ describe('main entrypoints', () => {
     validateConfigMock.mockReturnValue(true);
   });
 
-  it('doPost returns error when request body is missing', () => {
+  it('リクエストボディが無い場合はエラー応答を返すべき', () => {
     const { doPost } = getEntryPoints();
 
     const response = doPost({} as unknown as GoogleAppsScript.Events.DoPost);
@@ -78,7 +78,7 @@ describe('main entrypoints', () => {
     expect(consoleMock.error).toHaveBeenCalledWith('[Entry] 無効なリクエスト');
   });
 
-  it('doPost returns error when events are missing', () => {
+  it('イベント配列が無い場合はエラー応答を返すべき', () => {
     const { doPost } = getEntryPoints();
 
     const event = {
@@ -100,7 +100,7 @@ describe('main entrypoints', () => {
     );
   });
 
-  it('doPost returns ok even when routeEvent throws', () => {
+  it('routeEventが例外を投げても200応答を返すべき', () => {
     routeEventMock.mockImplementation(() => {
       throw new Error('route failure');
     });
@@ -128,7 +128,7 @@ describe('main entrypoints', () => {
     );
   });
 
-  it('doGet logs success and returns config status', () => {
+  it('doGet実行時に成功ログと設定検証結果を返すべき', () => {
     const { doGet } = getEntryPoints();
 
     doGet();
@@ -146,7 +146,7 @@ describe('main entrypoints', () => {
     );
   });
 
-  it('doGet handles validation failures', () => {
+  it('doGetで設定検証が失敗した場合はエラー応答を返すべき', () => {
     validateConfigMock.mockImplementationOnce(() => {
       throw new Error('config error');
     });
@@ -167,7 +167,7 @@ describe('main entrypoints', () => {
     });
   });
 
-  it('checkConfiguration logs successful validation', () => {
+  it('checkConfigurationで設定確認結果を成功ログに出力すべき', () => {
     const { checkConfiguration } = getEntryPoints();
 
     checkConfiguration();
@@ -176,7 +176,7 @@ describe('main entrypoints', () => {
     expect(consoleMock.log).toHaveBeenCalledWith('[Entry] 設定確認結果: 成功');
   });
 
-  it('checkConfiguration logs validation errors', () => {
+  it('checkConfigurationで検証エラーが発生した場合はエラーログを出力すべき', () => {
     validateConfigMock.mockImplementationOnce(() => {
       throw new Error('boom');
     });

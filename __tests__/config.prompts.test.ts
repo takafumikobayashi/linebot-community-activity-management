@@ -1,7 +1,7 @@
 import { getMessageTemplates } from '../src/utils/config';
 import { getSystemMessage } from '../src/utils/prompts';
 
-describe('config message templates', () => {
+describe('メッセージテンプレート設定のテスト', () => {
   it('組織設定に基づいてテンプレート文言を生成すべき', () => {
     const config = {
       name: 'テスト団体',
@@ -23,7 +23,7 @@ describe('config message templates', () => {
   });
 });
 
-describe('getSystemMessage', () => {
+describe('getSystemMessageのテスト', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });

@@ -17,4 +17,4 @@ export function getSystemMessage(): string {
  * 後方互換性のためのエイリアス
  * @deprecated getSystemMessage() を使用してください
  */
-export const KURUHOUSE_SYSTEM_MESSAGE = getSystemMessage();
+export const SHARED_SYSTEM_MESSAGE = getSystemMessage();

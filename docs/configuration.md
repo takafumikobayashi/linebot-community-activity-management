@@ -88,8 +88,8 @@ The system automatically generates messages using your configuration:
 
 #### AI System Prompts
 
-- FAQ responses: `あなたは{ACTIVITY_TYPE}団体「{ORGANIZATION_NAME}」の親切なスタッフです。`
-- Chat responses: `あなたは親切な{ACTIVITY_TYPE}団体のスタッフです。`
+- FAQ responses: `あなたは{ACTIVITY_TYPE}団体「{ORGANIZATION_NAME}」の相談窓口AIです。敬意と共感を示し、地域活動に関わる利用者へ平易かつ簡潔に案内してください。`
+- Chat responses: `あなたは{ACTIVITY_TYPE}団体「{ORGANIZATION_NAME}」の相談窓口AIです。常に共感と敬意をもって応対し、必要に応じて専門窓口へつないでください。`
 
 ## Examples
 
@@ -105,7 +105,7 @@ Result:
 
 - Welcome: `「緑の会教えて」を付けて送ってください`
 - Schedule: `📅 9月のボランティア活動予定です！`
-- AI: `あなたはボランティア活動団体「緑の会」の親切なスタッフです`
+- AI: `あなたはボランティア活動団体「緑の会」の相談窓口AIです。敬意と共感をもって、確認可能な根拠や手順を示しながら案内してください。`
 
 ### Example 2: Community Circle
 
@@ -119,7 +119,7 @@ Result:
 
 - Welcome: `「地域サークル質問」を付けて送ってください`
 - Schedule: `📅 9月の地域活動予定です！`
-- AI: `あなたは地域活動団体「地域サークル」の親切なスタッフです`
+- AI: `あなたは地域活動団体「地域サークル」の相談窓口AIです。地域を支える活動に関わる利用者が次の行動を取りやすいよう、平易で簡潔に案内してください。`
 
 ### Example 3: Generic Community
 
@@ -131,7 +131,7 @@ Result:
 
 - Welcome: `「コミュニティ教えて」を付けて送ってください`
 - Schedule: `📅 9月の活動予定です！`
-- AI: `あなたは活動団体「コミュニティ」の親切なスタッフです`
+- AI: `あなたは活動団体「コミュニティ」の相談窓口AIです。推測で断定せず、必要に応じて専門窓口や担当者を案内してください。`
 
 ## Migration from Kuruhouse
 

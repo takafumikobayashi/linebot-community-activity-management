@@ -29,6 +29,9 @@ npm test           # 全テスト実行（220テスト）
 
 # コミット前の必須確認
 npm run lint && npm test && npm run typecheck
+
+# GitHub Actions CI/CD確認
+# push時に自動実行：TypeScript → ESLint → テスト → デプロイ
 ```
 
 ### コミットメッセージルール
@@ -216,6 +219,19 @@ pushConfirmParticipationWithImage(userId, text, eventId, imageUrl?)
 - [ ] エラーハンドリングを必ず実装
 - [ ] 型定義を適切に設定
 
+### AIアシスタント利用ポリシー
+
+- diff と目的を先に提示し、yes/no で承認を得る。
+- 承認があるまでは git 更新系コマンドを実行しない。
+- 新ルール変更時は CLAUDE.md に追記する。
+
+### CI/CD品質ゲート
+
+- **GitHub Actions**: 自動品質チェックによりマージをブロック
+- **必須通過条件**: TypeScript型チェック + ESLint + 全テスト成功
+- **デプロイ可能条件**: CI/CDパイプライン完全成功のみ
+- **手動回避禁止**: [skip ci] タグの乱用を避ける
+
 ### 禁止事項
 
 - ❌ 旧LINE API関数（pushMessage等）の使用
@@ -272,11 +288,24 @@ MAX_CONTEXT_HOURS=24         # 会話履歴の有効時間（時間、デフォ�
 
 ### 環境別デプロイ
 
+#### ローカルデプロイ
+
 ```bash
 npm run deploy        # 開発環境（デフォルト）
 npm run deploy:dev    # 開発環境
 npm run deploy:stg    # ステージング環境
 npm run deploy:prod   # 本番環境
+```
+
+#### 自動デプロイ（GitHub Actions）
+
+```bash
+# 自動デプロイ
+git push origin develop  # → 開発環境に自動デプロイ
+git push origin main     # → 本番環境に自動デプロイ
+
+# 手動デプロイ
+# GitHub Actions > "Run workflow" > 環境選択 (dev/stg/prod)
 ```
 
 ### デプロイ前チェックリスト
@@ -286,6 +315,7 @@ npm run deploy:prod   # 本番環境
 - [ ] 環境変数設定確認
 - [ ] スプレッドシート権限確認
 - [ ] LINE Webhook URL設定
+- [ ] GitHub Secrets設定確認（自動デプロイ時）
 
 ## トラブルシューティング
 

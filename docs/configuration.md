@@ -40,6 +40,7 @@ FAQ_SINGLE_WORD_TRIGGERS=["持ち物","集合場所","アクセス","時間","�
 
 # Fallback Images (JSON array)
 FALLBACK_IMAGES=["https://example.com/image1.jpg","https://example.com/image2.jpg"]
+# 画像URLが空のイベントに対し、recordIdをハッシュして決定的に割り当て（カルーセル／リマインダーで常に同じ画像が選択されます）
 
 # Conversation Context Settings (NEW)
 MAX_CONVERSATION_PAIRS=7     # Maximum conversation pairs to reference (default: 7)
@@ -146,7 +147,9 @@ If migrating from the original Kuruhouse-specific version:
 
 2. Update your FAQ content in the spreadsheet to use generic terms
 
-3. Test the configuration with the FAQ trigger phrase
+3. Test the configuration with the FAQ trigger phrase  
+   - `__tests__/config.prompts.test.ts` verifies template生成・`getSystemMessage`のカスタマイズ結果  
+   - `__tests__/main.test.ts` で `doPost`/`doGet`/`checkConfiguration` の防御処理を検証済み
 
 ## Advanced Configuration
 
@@ -160,10 +163,11 @@ FAQ_SINGLE_WORD_TRIGGERS=["持ち物","集合場所","アクセス","時間","�
 
 ### Image Fallbacks
 
-Set fallback images for events without specific images:
+Set fallback images for events without specific images. The handler hashes the event recordId so that the same event always reuses the same fallback image:
 
 ```bash
 FALLBACK_IMAGES=["https://your-domain.com/default1.jpg","https://your-domain.com/default2.jpg"]
+# Deterministic assignment: same recordId ⇒ same image (covered by `__tests__/scheduled.test.ts`)
 ```
 
 ### AI Similarity Threshold

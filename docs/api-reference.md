@@ -51,6 +51,8 @@ interface MessageTemplates {
 function getMessageTemplates(config: OrganizationConfig): MessageTemplates
 ```
 
+> ✅ Coverage: `__tests__/config.prompts.test.ts` verifies that customized organization settings propagate to every template (welcome text, monthly header, prompts, system message).
+
 ## LINE Messaging API
 
 ### Core Functions

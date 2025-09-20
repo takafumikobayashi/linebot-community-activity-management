@@ -19,10 +19,12 @@ import {
   pushConfirmParticipationWithImage,
   multicastMessages,
 } from '../src/services/line';
+import { getFallbackImages } from '../src/utils/env';
 
 // 依存モジュールをモック化
 jest.mock('../src/services/sheet');
 jest.mock('../src/services/line');
+jest.mock('../src/utils/env');
 
 describe('scheduled.ts', () => {
   const mockGetAllUserIds = getAllUserIds as jest.Mock;
@@ -34,6 +36,7 @@ describe('scheduled.ts', () => {
   const _mockPushConfirmParticipationWithImage =
     pushConfirmParticipationWithImage as jest.Mock;
   const mockMulticastMessages = multicastMessages as jest.Mock;
+  const mockGetFallbackImages = getFallbackImages as jest.Mock;
   const mockUtilities = global.Utilities as jest.Mocked<
     typeof global.Utilities
   >;
@@ -44,6 +47,7 @@ describe('scheduled.ts', () => {
 
     // Utilitiesのモック設定
     mockUtilities.sleep = jest.fn();
+    mockGetFallbackImages.mockReturnValue([]);
   });
 
   describe('sendMonthlySchedule', () => {
@@ -285,6 +289,46 @@ describe('scheduled.ts', () => {
         '[Schedule] 空のrecordIdが検出されました: recordId空イベント',
       );
     });
+
+    it('画像URLが空でもフォールバック画像をカルーセルに適用し、一貫して選択すべき', () => {
+      const mockUsers = ['user1'];
+      const mockEvents = [
+        {
+          イベント名: 'フォールバックテスト',
+          開催日: '2025/9/15',
+          開始時間: '10:00',
+          終了時間: '12:00',
+          kintoneRecordId: '301',
+          画像URL: '',
+        },
+      ];
+
+      mockGetAllUserIds.mockReturnValue(mockUsers);
+      mockGetEventsForMonth.mockReturnValue(mockEvents);
+      mockGetFallbackImages.mockReturnValue([
+        'https://fallback.example.com/default.jpg',
+      ]);
+
+      sendMonthlySchedule();
+
+      const firstMessages = mockMulticastMessages.mock.calls[0][1];
+      const firstCarousel = firstMessages[1];
+      const firstColumns = firstCarousel.template.columns;
+
+      const chosenImage = firstColumns[0].thumbnailImageUrl;
+      expect(chosenImage).toBe('https://fallback.example.com/default.jpg');
+      expect(firstColumns[0].imageBackgroundColor).toBe('#FFFFFF');
+
+      mockMulticastMessages.mockClear();
+
+      sendMonthlySchedule();
+
+      const secondMessages = mockMulticastMessages.mock.calls[0][1];
+      const secondCarousel = secondMessages[1];
+      const secondColumns = secondCarousel.template.columns;
+
+      expect(secondColumns[0].thumbnailImageUrl).toBe(chosenImage);
+    });
   });
 
   describe('sendEventReminders', () => {
@@ -378,6 +422,33 @@ describe('scheduled.ts', () => {
         'user1',
         expect.stringContaining('🔔 リマインダー'),
         undefined, // フォールバック画像設定がない場合はundefined
+      );
+    });
+
+    it('フォールバック画像が設定されている場合、画像付きリマインダーを送信すべき', () => {
+      const mockEvents = [
+        {
+          イベント名: 'フォールバックリマインダー',
+          開始時間: '10:00',
+          終了時間: '12:00',
+          kintoneRecordId: '555',
+          画像URL: '',
+          出席者1: 'user1',
+        },
+      ];
+
+      mockGetEventsForDate.mockReturnValue(mockEvents);
+      mockGetAllUserIds.mockReturnValue(['user1']);
+      mockGetFallbackImages.mockReturnValue([
+        'https://fallback.example.com/reminder.jpg',
+      ]);
+
+      sendEventReminders();
+
+      expect(mockPushMessageWithImage).toHaveBeenCalledWith(
+        'user1',
+        expect.stringContaining('🔔 リマインダー'),
+        'https://fallback.example.com/reminder.jpg',
       );
     });
 

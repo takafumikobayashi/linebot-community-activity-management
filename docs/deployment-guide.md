@@ -53,7 +53,7 @@ FAQ_TRIGGER_PHRASE=教えて
 # Optional settings
 SIMILARITY_THRESHOLD=0.75
 FAQ_SINGLE_WORD_TRIGGERS=["持ち物","場所","時間"]
-FALLBACK_IMAGES=["https://example.com/image1.jpg"]
+FALLBACK_IMAGES=["https://example.com/image1.jpg"]  # recordIdをキーに決定的に割り当て（カルーセル／リマインダーで一貫表示）
 
 # Conversation Context Settings (NEW)
 MAX_CONVERSATION_PAIRS=7     # Default: 7 conversation pairs

@@ -173,8 +173,9 @@ function getMessageTemplates(config: OrganizationConfig): MessageTemplates {
 - RSVP parsing and processing
 - FAQ similarity matching
 - Conversation context management (NEW)
-- Template generation
-- Error handling
+- Template generation (`__tests__/config.prompts.test.ts`)
+- Error handling (`__tests__/main.test.ts` for GAS entrypoints)
+- Image fallback determinism (`__tests__/scheduled.test.ts`)
 
 ### Conversation Context System (NEW)
 

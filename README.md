@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Google Apps Script](https://img.shields.io/badge/Google%20Apps%20Script-4285F4?logo=google&logoColor=white)](https://script.google.com/)
-[![Tests](https://img.shields.io/badge/Tests-220%20passed-green)](https://github.com/takafumikobayashi/linebot-community-activity-management)
+[![Tests](https://img.shields.io/badge/Tests-243%20passed-green)](https://github.com/takafumikobayashi/linebot-community-activity-management)
 
 > **🎉 Open Source Release**: This project has been open sourced and is now available for any community or organization to use and customize!
 
@@ -42,7 +42,7 @@ npm test
 - **AI機能**: OpenAI API (GPT-4o-mini, text-embedding-3-small)
 - **データ管理**: Google Spreadsheet + kintone
 - **開発言語**: TypeScript
-- **テスト**: Jest
+- **テスト**: Jest（12スイート、243テスト）
 
 ## 主要機能 (8つの機能)
 
@@ -72,6 +72,7 @@ npm test
    - 月初の予定一斉配信機能（カルーセル形式・RSVP ボタン付き）
    - イベント前日のリマインダー機能
    - イベント当日のお礼メッセージ機能
+   - 画像URLが空の場合は `FALLBACK_IMAGES` からレコードIDベースで決定的に画像を選択（カルーセル・リマインダー双方でテスト済み）
 
 5. ✅ **参加確認** - 活動参加の意思確認
    - テキスト入力での参加確認（「参加する」「不参加」「キャンセル」等）
@@ -161,6 +162,7 @@ FAQ_SINGLE_WORD_TRIGGERS=["持ち物","集合場所","アクセス","時間","�
 # FALLBACK_IMAGES=["https://cdn.example.com/images/volunteer-1.jpg","https://cdn.example.com/images/volunteer-2.jpg"]
 # または
 # FALLBACK_IMAGES=https://cdn.example.com/images/volunteer-1.jpg,https://cdn.example.com/images/volunteer-2.jpg
+# 設定すると、recordId を元に決定的に画像が選択され、同一イベントで一貫した画像表示になります
 
 # 会話コンテキスト設定（NEW）
 MAX_CONVERSATION_PAIRS=7     # 雑談で参照する最大往復数（デフォルト: 7）
@@ -283,9 +285,13 @@ MAX_CONTEXT_HOURS=12         # 12時間以内の会話を対象
 
 ## テスト
 
-**テスト概要**: 10スイート、220テスト、90%以上カバレッジ
+**テスト概要**: 12スイート、243テスト、90%以上カバレッジ
 
 詳細なテスト構成・実行方法は [CLAUDE.md](./CLAUDE.md) を参照してください。
+
+- `__tests__/main.test.ts`: GAS エントリポイント（`doPost`/`doGet`/`checkConfiguration`）の防御的挙動を検証
+- `__tests__/scheduled.test.ts`: フォールバック画像決定ロジックを含むスケジュール周りを網羅（カルーセル/リマインダー/お礼メッセージ）
+- `__tests__/config.prompts.test.ts`: 組織設定のテンプレート出力と `getSystemMessage` のカスタマイズ結果を確認
 
 ## デプロイ手順
 

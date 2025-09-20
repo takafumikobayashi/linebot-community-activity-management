@@ -1,0 +1,15 @@
+# Dependencies
+/node_modules
+
+# Build output
+/dist
+
+# Reports
+/reports
+
+# Temp Files
+.DS_Store
+
+# clasp configuration (keep local to avoid exposing script IDs)
+.clasp.json
+.clasp.*.json

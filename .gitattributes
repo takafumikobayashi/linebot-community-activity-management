@@ -1,0 +1,12 @@
+# Git attributes for open source project
+
+# Ensure consistent line endings
+* text=auto
+
+# Ensure shell scripts have Unix line endings
+*.sh text eol=lf
+
+# Mark binary files
+*.jpg binary
+*.png binary
+*.gif binary

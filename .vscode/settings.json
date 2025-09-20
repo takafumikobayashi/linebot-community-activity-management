@@ -1,0 +1,11 @@
+{
+    "cucumberautocomplete.steps": [
+        "e2e/steps/**/*.ts"
+    ],
+        "cucumberautocomplete.syncfeatures": "docs/testplan/**/*.feature",
+        "cucumberautocomplete.gherkinDefinitionPart": "@cucumber/cucumber",
+        "cucumberautocomplete.strictGherkinCompletion": true,
+        "cucumberautocomplete.requireModule": [
+            "ts-node/register"
+    ]
+}

@@ -1,0 +1,51 @@
+{
+  "name": "linebot-community-activity-management",
+  "version": "1.0.0",
+  "description": "A configurable LINE chatbot system for community activity management with AI-powered FAQ, RSVP functionality, and event scheduling.",
+  "scripts": {
+    "test": "jest",
+    "build": "rimraf dist && esbuild src/main.ts --bundle --outfile=dist/main.js --charset=utf8 --format=esm && cp appsscript.json dist/",
+    "deploy": "npm run deploy:dev",
+    "deploy:dev": "npm run build && cp .clasp.dev.json .clasp.json && clasp push --force",
+    "deploy:stg": "npm run build && cp .clasp.stg.json .clasp.json && clasp push --force",
+    "deploy:prod": "npm run build && cp .clasp.prod.json .clasp.json && clasp push --force",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "cucumber": "cucumber-js -c cucumber.config.js",
+    "cucumber:verbose": "cucumber-js -c cucumber.config.js --format progress --format html:reports/cucumber-report.html"
+  },
+  "keywords": [
+    "line-bot",
+    "chatbot",
+    "community-management",
+    "google-apps-script",
+    "openai",
+    "typescript",
+    "rsvp",
+    "event-management"
+  ],
+  "author": "Community Activity Management System Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "@google/clasp": "^3.0.6-alpha",
+    "@types/google-apps-script": "^1.0.99",
+    "@types/jest": "^30.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "esbuild": "^0.25.8",
+    "eslint": "^9.30.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.1",
+    "jest": "^30.0.5",
+    "prettier": "^3.6.2",
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.41.0",
+    "@cucumber/cucumber": "^10.0.0",
+    "ts-node": "^10.9.2"
+  }
+}

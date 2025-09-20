@@ -7,7 +7,11 @@ import {
   createChatPromptWithHistory,
   generateChatWithHistory,
 } from '../src/services/openai';
-import { getConfig, getSingleWordFaqTriggers } from '../src/utils/env';
+import {
+  getConfig,
+  getSingleWordFaqTriggers,
+  getConversationContextConfig,
+} from '../src/utils/env';
 import {
   saveNewUser,
   getEventsForDate,
@@ -37,6 +41,8 @@ describe('router.ts', () => {
   const mockGenerateChatWithHistory = generateChatWithHistory as jest.Mock;
   const mockGetConfig = getConfig as jest.Mock;
   const mockGetSingleWordFaqTriggers = getSingleWordFaqTriggers as jest.Mock;
+  const mockGetConversationContextConfig =
+    getConversationContextConfig as jest.Mock;
   const mockSaveNewUser = saveNewUser as jest.Mock;
   const mockGetEventsForDate = getEventsForDate as jest.Mock;
   const mockRecordRSVPInEvent = recordRSVPInEvent as jest.Mock;
@@ -61,6 +67,12 @@ describe('router.ts', () => {
     if (mockGetSingleWordFaqTriggers) {
       mockGetSingleWordFaqTriggers.mockReturnValue([]);
     }
+
+    // 会話コンテキスト設定のデフォルト
+    mockGetConversationContextConfig.mockReturnValue({
+      maxConversationPairs: 7,
+      maxContextHours: 24,
+    });
 
     // デフォルトの返信メッセージモック
     mockReplyMessage.mockImplementation((_replyToken, _text) => {
@@ -933,7 +945,8 @@ describe('router.ts', () => {
 
       expect(mockGetRecentConversationForUser).toHaveBeenCalledWith(
         'test_user_id',
-        3,
+        7,
+        24,
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
         expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
@@ -966,7 +979,8 @@ describe('router.ts', () => {
 
       expect(mockGetRecentConversationForUser).toHaveBeenCalledWith(
         'test_user_id',
-        3,
+        7,
+        24,
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
         expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE

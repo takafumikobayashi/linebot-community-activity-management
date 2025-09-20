@@ -3,14 +3,11 @@
  */
 
 import {
-  syncEventsFromKintone,
   sendMonthlySchedule,
   sendEventReminders,
   sendThankYouMessages,
 } from '../src/handlers/scheduled';
-import { getEventsFromKintone } from '../src/services/kintone';
 import {
-  saveEventsToSheet,
   getAllUserIds,
   getEventsForMonth,
   getEventsForDate,
@@ -24,13 +21,10 @@ import {
 } from '../src/services/line';
 
 // 依存モジュールをモック化
-jest.mock('../src/services/kintone');
 jest.mock('../src/services/sheet');
 jest.mock('../src/services/line');
 
 describe('scheduled.ts', () => {
-  const mockGetEventsFromKintone = getEventsFromKintone as jest.Mock;
-  const mockSaveEventsToSheet = saveEventsToSheet as jest.Mock;
   const mockGetAllUserIds = getAllUserIds as jest.Mock;
   const mockGetEventsForMonth = getEventsForMonth as jest.Mock;
   const mockGetEventsForDate = getEventsForDate as jest.Mock;
@@ -50,53 +44,6 @@ describe('scheduled.ts', () => {
 
     // Utilitiesのモック設定
     mockUtilities.sleep = jest.fn();
-  });
-
-  describe('syncEventsFromKintone', () => {
-    it('kintoneからイベントを取得してスプレッドシートに保存すべき', () => {
-      const mockEvents = [
-        {
-          $id: { value: '1' },
-          イベント名: { value: 'テストイベント' },
-          開始日時: { value: '2025-09-01T10:00:00Z' },
-          終了日時: { value: '2025-09-01T12:00:00Z' },
-        },
-      ];
-
-      mockGetEventsFromKintone.mockReturnValue(mockEvents);
-
-      syncEventsFromKintone();
-
-      expect(mockGetEventsFromKintone).toHaveBeenCalled();
-      expect(mockSaveEventsToSheet).toHaveBeenCalledWith(mockEvents);
-      expect(mockConsole.log).toHaveBeenCalledWith(
-        '[Sync] kintoneイベント同期処理 正常終了',
-      );
-    });
-
-    it('kintoneからイベント取得に失敗した場合、エラーログを出力すべき', () => {
-      mockGetEventsFromKintone.mockImplementation(() => {
-        throw new Error('kintone接続エラー');
-      });
-
-      syncEventsFromKintone();
-
-      expect(mockConsole.error).toHaveBeenCalledWith(
-        '[Sync] kintoneイベント同期処理でエラーが発生しました:',
-        expect.any(Error),
-      );
-    });
-
-    it('空のイベント配列でも正常に処理すべき', () => {
-      mockGetEventsFromKintone.mockReturnValue([]);
-
-      syncEventsFromKintone();
-
-      expect(mockSaveEventsToSheet).toHaveBeenCalledWith([]);
-      expect(mockConsole.log).toHaveBeenCalledWith(
-        '[Sync] kintoneイベント同期処理 正常終了',
-      );
-    });
   });
 
   describe('sendMonthlySchedule', () => {

@@ -3,21 +3,7 @@
  */
 
 import { getConfig } from '../utils/env';
-import { FaqEntry, KintoneEventRecord } from '../types/index';
-
-/**
- * DateオブジェクトをYYYY/MM/DD形式の文字列に変換する
- * @param date 変換対象の日付
- * @returns YYYY/MM/DD形式の文字列
- */
-function formatDateAsYMD(date: Date): string {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  return `${year}/${month}/${day}`;
-}
-
-// (既存の関数は省略)
+import { FaqEntry } from '../types/index';
 
 /**
  * FAQシートからデータを取得する
@@ -144,10 +130,12 @@ export function writeLog(logData: {
  * 直近のペア（ユーザー発話/ボット応答）を古い→新しい順で返す
  * @param userId ユーザーID
  * @param limitPairs 取得する発話ペア数（既定: 3 = 直近3往復）
+ * @param maxHours 取得対象期間（時間）。指定した時間以内の会話のみ取得（既定: 24時間）
  */
 export function getRecentConversationForUser(
   userId: string,
   limitPairs: number = 3,
+  maxHours: number = 24,
 ): Array<{ role: 'user' | 'assistant'; content: string }> {
   const config = getConfig();
   try {
@@ -168,9 +156,38 @@ export function getRecentConversationForUser(
 
     // Logシート列想定: [timestamp, userId, message, response, similarity]
     const pairs: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+
+    // 時間フィルタリング用のカットオフ時間を計算
+    let cutoffTime: Date | null = null;
+    try {
+      cutoffTime = new Date();
+      cutoffTime.setHours(cutoffTime.getHours() - maxHours);
+    } catch (e) {
+      // テスト環境等でDateが機能しない場合は時間フィルタリングを無効化
+      console.warn(
+        '[Sheet] 時間フィルタリング初期化失敗、フィルタリングを無効化:',
+        e,
+      );
+      cutoffTime = null;
+    }
+
     for (let i = 0; i < values.length; i++) {
       const row = values[i];
       if (String(row[1]) !== String(userId)) continue;
+
+      // 時間フィルタリング: maxHours時間以内の会話のみ取得
+      const timestamp = row[0];
+      if (timestamp && cutoffTime) {
+        try {
+          const messageTime = new Date(timestamp);
+          if (messageTime < cutoffTime) continue;
+        } catch (e) {
+          // タイムスタンプ解析失敗時はその行をスキップ
+          console.warn('[Sheet] タイムスタンプ解析失敗:', timestamp, e);
+          continue;
+        }
+      }
+
       const msg = String(row[2] || '');
       const resp = String(row[3] || '');
       if (msg) pairs.push({ role: 'user', content: msg });
@@ -231,168 +248,6 @@ export function getFaqsWithoutEmbedding(): Array<
     return results;
   } catch (error) {
     console.error('[Sheet] Embedding未設定FAQ取得エラー:', error);
-    throw error;
-  }
-}
-
-/**
- * kintoneから取得したイベントデータをEventシートに保存・更新（Upsert）する
- * 既存レコードのうち、kintoneから取得されなかった（削除された）レコードは「キャンセル」ステータスに更新
- * @param events イベントデータの配列
- */
-export function saveEventsToSheet(events: KintoneEventRecord[]): void {
-  const config = getConfig();
-
-  try {
-    const sheet = SpreadsheetApp.openById(config.SPREADSHEET_ID).getSheetByName(
-      'Event',
-    );
-    if (!sheet) throw new Error('Eventシートが見つかりません');
-
-    const headers = sheet
-      .getRange(1, 1, 1, sheet.getLastColumn())
-      .getValues()[0];
-    const recordIdCol = headers.indexOf('kintoneRecordId');
-    const statusCol = headers.indexOf('ステータス');
-    if (recordIdCol === -1)
-      throw new Error('ヘッダー「kintoneRecordId」が見つかりません');
-    if (statusCol === -1)
-      throw new Error('ヘッダー「ステータス」が見つかりません');
-
-    const existingData =
-      sheet.getLastRow() > 1
-        ? sheet
-            .getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn())
-            .getValues()
-        : [];
-    // 既存行を kintoneRecordId(文字列) をキーにマップ化
-    const existingEventMap = new Map(
-      existingData.map((row, index) => [
-        String(row[recordIdCol] ?? ''),
-        { rowNum: index + 2, data: row },
-      ]),
-    );
-
-    // kintoneから取得されたレコードIDのセット（文字列化）
-    const kintoneRecordIds = new Set(
-      events.map((event) => String(event.$id.value)),
-    );
-
-    // 取得対象月（YYYY-MM）の集合を作る
-    // 空配列（取得失敗など）の場合はキャンセル判定を行わないため、空のままにする
-    const targetYmSet = new Set<string>();
-    for (const ev of events) {
-      const dt = new Date(String(ev['開始日時'].value));
-      if (!isNaN(dt.getTime())) {
-        const ym = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
-        targetYmSet.add(ym);
-      }
-    }
-
-    const dateCol = headers.indexOf('開催日');
-
-    let updatedCount = 0;
-    let appendedCount = 0;
-    let cancelledCount = 0;
-
-    // 1. kintoneから取得したイベントを処理（追加・更新）
-    for (const event of events) {
-      const recordId = String(event.$id.value);
-      const existing = existingEventMap.get(recordId);
-
-      // 日付フォーマットをyyyy/mm/dd形式に変更
-      const startDateTime = new Date(String(event['開始日時'].value));
-      const endDateTime = new Date(String(event['終了日時'].value));
-
-      const eventData: Record<string, unknown> = {
-        kintoneRecordId: recordId,
-        ステータス: existing ? existing.data[statusCol] : '未開催', // 既存の場合は既存ステータスを保持
-        イベント名: event['イベント名'].value,
-        開催日: formatDateAsYMD(startDateTime),
-        開始時間: startDateTime.toLocaleTimeString('ja-JP', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        終了時間: endDateTime.toLocaleTimeString('ja-JP', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-      };
-
-      if (existing) {
-        // 更新（ステータスが「キャンセル」の場合は「未開催」に復活）
-        let hasChanges = false;
-        for (const header of Object.keys(eventData)) {
-          const col = headers.indexOf(header);
-          if (col !== -1) {
-            const currentValue = existing.data[col];
-            const newValue = eventData[header];
-
-            // ステータス復活チェック
-            if (header === 'ステータス' && currentValue === 'キャンセル') {
-              sheet.getRange(existing.rowNum, col + 1).setValue('未開催');
-              hasChanges = true;
-            } else if (currentValue !== newValue) {
-              sheet.getRange(existing.rowNum, col + 1).setValue(newValue);
-              hasChanges = true;
-            }
-          }
-        }
-        if (hasChanges) updatedCount++;
-      } else {
-        // 新規追加
-        const newRow = headers.map((header) => eventData[header] || '');
-        sheet.appendRow(newRow);
-        appendedCount++;
-      }
-    }
-
-    // 2. kintoneから削除されたレコードを「キャンセル」ステータスに更新
-    // 条件:
-    //  - 取得対象月に属する行のみ
-    //  - 現在のステータスが「未開催」の行のみ
-    //  - 取得結果に同じkintoneRecordIdが存在しない
-    if (targetYmSet.size > 0 && dateCol !== -1) {
-      for (const [recordId, existing] of existingEventMap) {
-        if (kintoneRecordIds.has(String(recordId))) continue; // 取得済み → スキップ
-
-        const currentStatus = String(existing.data[statusCol] ?? '');
-
-        const dateCell = existing.data[dateCol];
-        const d = new Date(String(dateCell));
-
-        if (isNaN(d.getTime())) {
-          // 日付が不正（例: ヘッダー行等）の場合は互換性のためキャンセル扱い
-          if (currentStatus !== 'キャンセル') {
-            sheet
-              .getRange(existing.rowNum, statusCol + 1)
-              .setValue('キャンセル');
-            cancelledCount++;
-          }
-          continue;
-        }
-
-        // 日付が有効な場合のみ、対象月かつ未開催の行をキャンセル
-        const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        if (targetYmSet.has(ym) && currentStatus === '未開催') {
-          sheet.getRange(existing.rowNum, statusCol + 1).setValue('キャンセル');
-          cancelledCount++;
-        }
-      }
-    } else {
-      // 取得イベントが空（または開催日列が無い）場合は安全のためキャンセル処理をスキップ
-      if (events.length === 0) {
-        console.warn(
-          '[Sheet] 取得イベントが空のため、キャンセル更新はスキップしました',
-        );
-      }
-    }
-
-    console.log(
-      `[Sheet] Eventシートへの保存完了。追加: ${appendedCount}件, 更新: ${updatedCount}件, キャンセル: ${cancelledCount}件`,
-    );
-  } catch (error) {
-    console.error('[Sheet] Eventシートへの保存エラー:', error);
     throw error;
   }
 }

@@ -7,7 +7,11 @@ import { LineEvent } from './types/index';
 import { handleFaq } from './handlers/faq';
 import { replyMessage, pushMessage } from './services/line';
 import { generateChatWithHistory } from './services/openai';
-import { getConfig, getSingleWordFaqTriggers } from './utils/env';
+import {
+  getConfig,
+  getSingleWordFaqTriggers,
+  getConversationContextConfig,
+} from './utils/env';
 import { getSystemMessage } from './utils/prompts';
 import {
   getOrganizationConfig,
@@ -857,7 +861,14 @@ export function handleGeneralChat(
     }> = [];
     try {
       if (typeof getRecentConversationForUser === 'function') {
-        const h = getRecentConversationForUser(userId, 3);
+        // 設定可能なコンテキスト拡張
+        const contextConfig = getConversationContextConfig();
+
+        const h = getRecentConversationForUser(
+          userId,
+          contextConfig.maxConversationPairs,
+          contextConfig.maxContextHours,
+        );
         if (Array.isArray(h)) history = h;
       }
     } catch (e) {

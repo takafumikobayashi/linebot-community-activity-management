@@ -28,9 +28,6 @@ describe('env.ts', () => {
           SPREADSHEET_ID: 'test_spreadsheet_id',
           STAFF_USER_ID: 'U123456,U789012',
           SIMILARITY_THRESHOLD: '0.8',
-          KINTONE_DOMAIN: 'test-domain',
-          KINTONE_EVENT_APP_ID: '100',
-          KINTONE_EVENT_API_TOKEN: 'test_kintone_token',
         };
         return mockValues[key] || null;
       });
@@ -43,9 +40,6 @@ describe('env.ts', () => {
         SPREADSHEET_ID: 'test_spreadsheet_id',
         STAFF_USER_ID: 'U123456,U789012',
         SIMILARITY_THRESHOLD: 0.8,
-        KINTONE_DOMAIN: 'test-domain',
-        KINTONE_EVENT_APP_ID: '100',
-        KINTONE_EVENT_API_TOKEN: 'test_kintone_token',
       });
     });
 
@@ -57,9 +51,6 @@ describe('env.ts', () => {
           SPREADSHEET_ID: 'test_spreadsheet_id',
           STAFF_USER_ID: 'U123456',
           // SIMILARITY_THRESHOLD を設定しない
-          KINTONE_DOMAIN: 'test-domain',
-          KINTONE_EVENT_APP_ID: '100',
-          KINTONE_EVENT_API_TOKEN: 'test_kintone_token',
         };
         return mockValues[key] || null;
       });
@@ -109,39 +100,6 @@ describe('env.ts', () => {
       );
     });
 
-    it('KINTONE_DOMAINが未設定の場合、エラーをスローすべき', () => {
-      mockProperties.getProperty.mockImplementation((key: string) => {
-        if (key === 'KINTONE_DOMAIN') return null;
-        return 'test_value';
-      });
-
-      expect(() => getConfig()).toThrow(
-        'kintoneのドメインが設定されていません',
-      );
-    });
-
-    it('KINTONE_EVENT_APP_IDが未設定の場合、エラーをスローすべき', () => {
-      mockProperties.getProperty.mockImplementation((key: string) => {
-        if (key === 'KINTONE_EVENT_APP_ID') return null;
-        return 'test_value';
-      });
-
-      expect(() => getConfig()).toThrow(
-        'kintoneのイベントマスタアプリIDが設定されていません',
-      );
-    });
-
-    it('KINTONE_EVENT_API_TOKENが未設定の場合、エラーをスローすべき', () => {
-      mockProperties.getProperty.mockImplementation((key: string) => {
-        if (key === 'KINTONE_EVENT_API_TOKEN') return null;
-        return 'test_value';
-      });
-
-      expect(() => getConfig()).toThrow(
-        'kintoneのイベントマスタAPIトークンが設定されていません',
-      );
-    });
-
     it('SIMILARITY_THRESHOLDが不正な値の場合、エラーをスローすべき', () => {
       mockProperties.getProperty.mockImplementation((key: string) => {
         const mockValues: { [key: string]: string } = {
@@ -150,9 +108,6 @@ describe('env.ts', () => {
           SPREADSHEET_ID: 'test_id',
           STAFF_USER_ID: 'U123456',
           SIMILARITY_THRESHOLD: 'invalid_number', // 不正な値
-          KINTONE_DOMAIN: 'test-domain',
-          KINTONE_EVENT_APP_ID: '100',
-          KINTONE_EVENT_API_TOKEN: 'test_kintone_token',
         };
         return mockValues[key] || null;
       });
@@ -170,9 +125,6 @@ describe('env.ts', () => {
           SPREADSHEET_ID: 'test_id',
           STAFF_USER_ID: 'U123456',
           SIMILARITY_THRESHOLD: '1.5', // 範囲外（0-1を超える）
-          KINTONE_DOMAIN: 'test-domain',
-          KINTONE_EVENT_APP_ID: '100',
-          KINTONE_EVENT_API_TOKEN: 'test_kintone_token',
         };
         return mockValues[key] || null;
       });
@@ -190,9 +142,6 @@ describe('env.ts', () => {
           SPREADSHEET_ID: 'test_id',
           STAFF_USER_ID: 'U123456',
           SIMILARITY_THRESHOLD: '-0.1', // 負の値
-          KINTONE_DOMAIN: 'test-domain',
-          KINTONE_EVENT_APP_ID: '100',
-          KINTONE_EVENT_API_TOKEN: 'test_kintone_token',
         };
         return mockValues[key] || null;
       });
@@ -211,9 +160,6 @@ describe('env.ts', () => {
           SPREADSHEET_ID: 'test_id',
           STAFF_USER_ID: 'U123456',
           SIMILARITY_THRESHOLD: '0',
-          KINTONE_DOMAIN: 'test-domain',
-          KINTONE_EVENT_APP_ID: '100',
-          KINTONE_EVENT_API_TOKEN: 'test_kintone_token',
         };
         return mockValues[key] || null;
       });
@@ -229,9 +175,6 @@ describe('env.ts', () => {
           SPREADSHEET_ID: 'test_id',
           STAFF_USER_ID: 'U123456',
           SIMILARITY_THRESHOLD: '1',
-          KINTONE_DOMAIN: 'test-domain',
-          KINTONE_EVENT_APP_ID: '100',
-          KINTONE_EVENT_API_TOKEN: 'test_kintone_token',
         };
         return mockValues[key] || null;
       });
@@ -250,9 +193,6 @@ describe('env.ts', () => {
           SPREADSHEET_ID: 'test_id',
           STAFF_USER_ID: 'U123456',
           SIMILARITY_THRESHOLD: '0.75',
-          KINTONE_DOMAIN: 'test-domain',
-          KINTONE_EVENT_APP_ID: '100',
-          KINTONE_EVENT_API_TOKEN: 'test_kintone_token',
         };
         return mockValues[key] || null;
       });

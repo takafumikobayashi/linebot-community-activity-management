@@ -54,6 +54,10 @@ FAQ_TRIGGER_PHRASE=教えて
 SIMILARITY_THRESHOLD=0.75
 FAQ_SINGLE_WORD_TRIGGERS=["持ち物","場所","時間"]
 FALLBACK_IMAGES=["https://example.com/image1.jpg"]
+
+# Conversation Context Settings (NEW)
+MAX_CONVERSATION_PAIRS=7     # Default: 7 conversation pairs
+MAX_CONTEXT_HOURS=24         # Default: 24 hours
 ```
 
 ### 3. Environment Setup (Multi-Environment Support)
@@ -91,7 +95,7 @@ cp .clasp.prod.json.template .clasp.prod.json
 Create a spreadsheet with these sheets:
 
 - **FAQ**: Questions, answers, and embeddings
-- **Log**: Conversation history
+- **Log**: Conversation history (for contextual chat)
 - **Users**: User management
 - **Event**: Event data (synced from kintone)
 - **Participation**: RSVP records
@@ -137,6 +141,8 @@ SPREADSHEET_ID=dev_spreadsheet_id
 CHANNEL_ACCESS_TOKEN=dev_line_token
 ORGANIZATION_NAME=テスト組織
 ACTIVITY_TYPE=テスト活動
+MAX_CONVERSATION_PAIRS=3     # Lightweight for testing
+MAX_CONTEXT_HOURS=12         # Shorter context window
 
 # Deploy
 npm run deploy:dev
@@ -151,6 +157,8 @@ CHANNEL_ACCESS_TOKEN=stg_line_token
 KINTONE_DOMAIN=stg_kintone_domain
 ORGANIZATION_NAME=ステージング組織
 ACTIVITY_TYPE=ステージング活動
+MAX_CONVERSATION_PAIRS=5     # Moderate context for testing
+MAX_CONTEXT_HOURS=18         # Extended but not full production
 
 # Deploy
 npm run deploy:stg
@@ -165,6 +173,8 @@ CHANNEL_ACCESS_TOKEN=prod_line_token
 KINTONE_DOMAIN=prod_kintone_domain
 ORGANIZATION_NAME=本番組織名
 ACTIVITY_TYPE=本番活動
+MAX_CONVERSATION_PAIRS=7     # Full context for production
+MAX_CONTEXT_HOURS=24         # Standard 24-hour memory
 
 # Deploy
 npm run deploy:prod
@@ -195,6 +205,10 @@ Send these test messages to your LINE bot:
 
 # Schedule inquiry
 今後の予定
+
+# Casual chat with context
+こんにちは
+今日はいい天気ですね
 ```
 
 ### 2. Configuration Verification
@@ -205,6 +219,7 @@ Verify these elements use your custom configuration:
 - FAQ responses mention your activity type
 - Monthly schedules use your activity terminology
 - AI responses reflect your organization context
+- Conversation context maintains continuity (test multiple sequential messages)
 
 ### 3. Error Handling Test
 

@@ -20,7 +20,7 @@ import {
   generateChatWithHistory,
 } from '../src/services/openai';
 import { replyMessage } from '../src/services/line';
-import { getConfig } from '../src/utils/env';
+import { getConfig, getConversationContextConfig } from '../src/utils/env';
 import {
   calculateCosineSimilarity,
   isValidVector,
@@ -45,6 +45,8 @@ describe('faq.ts', () => {
   const mockGenerateChatWithHistory = generateChatWithHistory as jest.Mock;
   const mockReplyMessage = replyMessage as jest.Mock;
   const mockGetConfig = getConfig as jest.Mock;
+  const mockGetConversationContextConfig =
+    getConversationContextConfig as jest.Mock;
   const mockCalculateCosineSimilarity = calculateCosineSimilarity as jest.Mock;
   const mockIsValidVector = jest.mocked(isValidVector);
   const mockGetFaqsWithoutEmbedding = getFaqsWithoutEmbedding as jest.Mock;
@@ -59,6 +61,12 @@ describe('faq.ts', () => {
     mockGetConfig.mockReturnValue({
       SIMILARITY_THRESHOLD: 0.75,
       SPREADSHEET_ID: 'test_id',
+    });
+
+    // 会話コンテキスト設定のデフォルト
+    mockGetConversationContextConfig.mockReturnValue({
+      maxConversationPairs: 7,
+      maxContextHours: 24,
     });
 
     mockGetFaqData.mockReturnValue([
@@ -127,7 +135,8 @@ describe('faq.ts', () => {
 
       expect(mockGetRecentConversationForUser).toHaveBeenCalledWith(
         testUserId,
-        3,
+        7,
+        24,
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
         expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
@@ -160,7 +169,8 @@ describe('faq.ts', () => {
       expect(mockGetEmbedding).not.toHaveBeenCalled();
       expect(mockGetRecentConversationForUser).toHaveBeenCalledWith(
         testUserId,
-        3,
+        7,
+        24,
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
         expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
@@ -184,7 +194,8 @@ describe('faq.ts', () => {
 
       expect(mockGetRecentConversationForUser).toHaveBeenCalledWith(
         testUserId,
-        3,
+        7,
+        24,
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
         expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE
@@ -213,7 +224,8 @@ describe('faq.ts', () => {
 
       expect(mockGetRecentConversationForUser).toHaveBeenCalledWith(
         testUserId,
-        3,
+        7,
+        24,
       );
       expect(mockGenerateChatWithHistory).toHaveBeenCalledWith(
         expect.any(String), // KURUHOUSE_SYSTEM_MESSAGE

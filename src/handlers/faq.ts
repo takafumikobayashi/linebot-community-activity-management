@@ -4,7 +4,7 @@
  */
 
 import { SearchResult } from '../types/index';
-import { getConfig } from '../utils/env';
+import { getConfig, getConversationContextConfig } from '../utils/env';
 import { calculateCosineSimilarity, isValidVector } from '../utils/similarity';
 import {
   getOrganizationConfig,
@@ -75,7 +75,13 @@ export function handleFaq(
         content: string;
       }> = [];
       try {
-        history = getRecentConversationForUser(userId, 3);
+        // 設定可能なコンテキスト拡張
+        const contextConfig = getConversationContextConfig();
+        history = getRecentConversationForUser(
+          userId,
+          contextConfig.maxConversationPairs,
+          contextConfig.maxContextHours,
+        );
       } catch (e) {
         console.warn('[FAQ] 会話履歴の取得に失敗しました:', e);
       }

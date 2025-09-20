@@ -77,11 +77,6 @@ export interface Config {
   SPREADSHEET_ID: string;
   STAFF_USER_ID: string;
   SIMILARITY_THRESHOLD: number;
-
-  // kintone
-  KINTONE_DOMAIN: string;
-  KINTONE_EVENT_APP_ID: string;
-  KINTONE_EVENT_API_TOKEN: string;
 }
 
 // エラー関連
@@ -96,29 +91,4 @@ export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: AppError;
-}
-
-// kintone API関連
-export interface KintoneFieldValue {
-  type: string;
-  value: unknown;
-}
-
-export interface KintoneRecord {
-  $id: KintoneFieldValue;
-  [key: string]: KintoneFieldValue;
-}
-
-export interface KintoneRecordResponse {
-  records: KintoneRecord[];
-}
-
-export interface KintoneEventRecord extends KintoneRecord {
-  イベント名: KintoneFieldValue;
-  開始日時: KintoneFieldValue;
-  終了日時: KintoneFieldValue;
-}
-
-export interface KintoneEventResponse {
-  records: KintoneEventRecord[];
 }

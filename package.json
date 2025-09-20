@@ -12,9 +12,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "typecheck": "tsc --noEmit",
-    "cucumber": "cucumber-js -c cucumber.config.js",
-    "cucumber:verbose": "cucumber-js -c cucumber.config.js --format progress --format html:reports/cucumber-report.html"
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "line-bot",
@@ -45,7 +43,6 @@
     "ts-jest": "^29.4.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.41.0",
-    "@cucumber/cucumber": "^10.0.0",
     "ts-node": "^10.9.2"
   }
 }

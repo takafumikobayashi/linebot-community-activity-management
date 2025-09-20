@@ -40,6 +40,10 @@ FAQ_SINGLE_WORD_TRIGGERS=["持ち物","集合場所","アクセス","時間","�
 
 # Fallback Images (JSON array)
 FALLBACK_IMAGES=["https://example.com/image1.jpg","https://example.com/image2.jpg"]
+
+# Conversation Context Settings (NEW)
+MAX_CONVERSATION_PAIRS=7     # Maximum conversation pairs to reference (default: 7)
+MAX_CONTEXT_HOURS=24         # Time window for conversation history in hours (default: 24)
 ```
 
 ## Organization Customization
@@ -168,6 +172,25 @@ Adjust how strict the FAQ matching is (0.0 to 1.0):
 
 ```bash
 SIMILARITY_THRESHOLD=0.75  # Higher = stricter matching
+```
+
+### Conversation Context Settings
+
+Configure how the AI maintains conversation context in casual chat:
+
+```bash
+# Conversation pairs to reference (default: 7)
+MAX_CONVERSATION_PAIRS=7     # Range: 1-15, higher = more context
+
+# Time window for conversation history (default: 24 hours)
+MAX_CONTEXT_HOURS=24         # Range: 1-168, higher = longer memory
+
+# Examples:
+MAX_CONVERSATION_PAIRS=10    # Extended context for better continuity
+MAX_CONTEXT_HOURS=48         # Remember conversations for 2 days
+
+MAX_CONVERSATION_PAIRS=3     # Lightweight for performance
+MAX_CONTEXT_HOURS=12         # Short-term memory only
 ```
 
 ## Testing Your Configuration

@@ -79,7 +79,8 @@ The system is built as a serverless chatbot application using:
 - **Model**: GPT-4o-mini
 - **Features**:
   - Context-aware responses
-  - Conversation history (max 3 exchanges)
+  - Conversation history (max 7 exchanges, 24 hours, configurable)
+  - Time-based conversation filtering
   - Organization-specific prompts
 
 ### Data Management
@@ -87,7 +88,7 @@ The system is built as a serverless chatbot application using:
 #### Google Spreadsheet Structure
 
 - **FAQ Sheet**: Questions, answers, embeddings
-- **Log Sheet**: Conversation history
+- **Log Sheet**: Conversation history (time-filtered, max 7 exchanges)
 - **Users Sheet**: User registration data
 - **Event Sheet**: Activity events (synced from kintone)
 - **Participation Sheet**: RSVP records
@@ -155,7 +156,7 @@ function getMessageTemplates(config: OrganizationConfig): MessageTemplates {
 
 ### Test Coverage
 
-- **Total Tests**: 243 tests across 11 test suites
+- **Total Tests**: 220 tests across 10 test suites
 - **Coverage Target**: 90%+
 - **Test Types**: Unit, Integration, E2E
 
@@ -171,8 +172,38 @@ function getMessageTemplates(config: OrganizationConfig): MessageTemplates {
 - Message routing logic
 - RSVP parsing and processing
 - FAQ similarity matching
+- Conversation context management (NEW)
 - Template generation
 - Error handling
+
+### Conversation Context System (NEW)
+
+```typescript
+// Time-based conversation filtering
+function getRecentConversationForUser(
+  userId: string,
+  limitPairs: number = 7,
+  maxHours: number = 24
+): Array<{ role: 'user' | 'assistant'; content: string }> {
+  // Filter conversations within time window
+  const cutoffTime = new Date();
+  cutoffTime.setHours(cutoffTime.getHours() - maxHours);
+
+  // Retrieve and process conversation history
+  // ...
+}
+
+// Configurable context settings
+function getConversationContextConfig(): {
+  maxConversationPairs: number;
+  maxContextHours: number;
+} {
+  return {
+    maxConversationPairs: getEnvVar('MAX_CONVERSATION_PAIRS', 7),
+    maxContextHours: getEnvVar('MAX_CONTEXT_HOURS', 24),
+  };
+}
+```
 
 ## Performance Considerations
 
@@ -188,6 +219,8 @@ function getMessageTemplates(config: OrganizationConfig): MessageTemplates {
 - **Batch Processing**: Multiple operations in single execution
 - **Caching**: FAQ embeddings cached in spreadsheet
 - **Pagination**: Large datasets processed in chunks
+- **Conversation History**: Limited to 200 rows read per query
+- **Time Filtering**: Only process conversations within configured time window
 - **Error Recovery**: Graceful degradation on failures
 
 ## Security
